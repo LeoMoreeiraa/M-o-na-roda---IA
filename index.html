@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mão na Roda - Assistente IA para Manutenção Automotiva</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef, useEffect } = React;
+
+        // Ícones SVG
+        const Send = () => (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+        );
+
+        const Wrench = ({size = 24}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+            </svg>
+        );
+
+        const CheckCircle = ({size = 16}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+        );
+
+        const AlertCircle = ({size = 16}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        );
+
+        const DollarSign = ({size = 16}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+        );
+
+        const Car = ({size = 18}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path>
+                <circle cx="7" cy="17" r="2"></circle>
+                <path d="M9 17h6"></path>
+                <circle cx="17" cy="17" r="2"></circle>
+            </svg>
+        );
+
+        const MaoNaRoda = () => {
+            const [messages, setMessages] = useState([
+                {
+                    type: 'bot',
+                    content: 'Olá! 👋 Sou o assistente virtual **Mão na Roda**. Estou aqui para te ajudar com problemas do seu veículo!\n\nPor favor, me conte: **qual problema você está enfrentando com seu carro?**',
+                    timestamp: new Date()
+                }
+            ]);
+            const [input, setInput] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const [currentStep, setCurrentStep] = useState('initial');
+            const [diagnosticData, setDiagnosticData] = useState({});
+            const messagesEndRef = useRef(null);
+
+            const scrollToBottom = () => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            useEffect(() => {
+                scrollToBottom();
+            }, [messages, isTyping]);
+
+            const problemDatabase = {
+                'barulho motor': {
+                    problema: 'Barulho no Motor',
+                    causas: ['Correia dentada desgastada', 'Falta de óleo', 'Problema no sistema de arrefecimento', 'Velas de ignição'],
+                    gravidade: 'Alta',
+                    custoMin: 150,
+                    custoMax: 1200,
+                    urgencia: 'Não dirija longas distâncias até verificar'
+                },
+                'freio': {
+                    problema: 'Problema no Sistema de Freios',
+                    causas: ['Pastilhas desgastadas', 'Disco de freio empenado', 'Fluido de freio baixo', 'Pinça travada'],
+                    gravidade: 'Crítica',
+                    custoMin: 200,
+                    custoMax: 800,
+                    urgencia: 'URGENTE - Procure oficina imediatamente'
+                },
+                'fumaça': {
+                    problema: 'Fumaça no Escapamento',
+                    causas: ['Queima de óleo (anéis desgastados)', 'Junta do cabeçote', 'Mistura ar/combustível incorreta'],
+                    gravidade: 'Alta',
+                    custoMin: 300,
+                    custoMax: 2500,
+                    urgencia: 'Evite uso prolongado do veículo'
+                },
+                'superaquecimento': {
+                    problema: 'Motor Superaquecendo',
+                    causas: ['Válvula termostática travada', 'Radiador entupido', 'Bomba d\'água com problema', 'Falta de fluido'],
+                    gravidade: 'Alta',
+                    custoMin: 180,
+                    custoMax: 900,
+                    urgencia: 'Não dirija com o motor quente'
+                },
+                'partida': {
+                    problema: 'Dificuldade na Partida',
+                    causas: ['Bateria fraca/descarregada', 'Motor de arranque', 'Sistema de injeção', 'Velas de ignição'],
+                    gravidade: 'Média',
+                    custoMin: 100,
+                    custoMax: 600,
+                    urgencia: 'Pode deixar você na mão a qualquer momento'
+                },
+                'vibração': {
+                    problema: 'Vibrações no Veículo',
+                    causas: ['Balanceamento de rodas', 'Amortecedores', 'Coxins do motor', 'Alinhamento'],
+                    gravidade: 'Média',
+                    custoMin: 120,
+                    custoMax: 800,
+                    urgencia: 'Pode causar desgaste de outros componentes'
+                },
+                'luz painel': {
+                    problema: 'Luz no Painel Acesa',
+                    causas: ['Sistema de injeção eletrônica', 'Sensor de oxigênio', 'Catalisador', 'Sensor de rotação'],
+                    gravidade: 'Média a Alta',
+                    custoMin: 150,
+                    custoMax: 1500,
+                    urgencia: 'Faça diagnóstico com scanner o quanto antes'
+                },
+                'consumo': {
+                    problema: 'Alto Consumo de Combustível',
+                    causas: ['Filtro de ar sujo', 'Velas inadequadas', 'Pneus descalibrados', 'Sensor de oxigênio'],
+                    gravidade: 'Baixa',
+                    custoMin: 80,
+                    custoMax: 400,
+                    urgencia: 'Afeta seu bolso, mas não é emergência'
+                }
+            };
+
+            const oficinas = [
+                { nome: 'AutoCenter Silva', distancia: '1.2 km', avaliacao: 4.8, especialidade: 'Mecânica Geral', preco: '$$' },
+                { nome: 'Oficina do João', distancia: '2.5 km', avaliacao: 4.6, especialidade: 'Freios e Suspensão', preco: '$' },
+                { nome: 'Speed Car Service', distancia: '3.1 km', avaliacao: 4.9, especialidade: 'Injeção Eletrônica', preco: '$$$' },
+                { nome: 'Mecânica São Paulo', distancia: '4.0 km', avaliacao: 4.5, especialidade: 'Motor e Câmbio', preco: '$' }
+            ];
+
+            const detectProblem = (text) => {
+                const lowerText = text.toLowerCase();
+                for (const [key, data] of Object.entries(problemDatabase)) {
+                    if (lowerText.includes(key)) {
+                        return data;
+                    }
+                }
+                
+                if (lowerText.includes('não liga') || lowerText.includes('nao liga')) {
+                    return problemDatabase['partida'];
+                }
+                if (lowerText.includes('treme') || lowerText.includes('chacoalha')) {
+                    return problemDatabase['vibração'];
+                }
+                if (lowerText.includes('luz') || lowerText.includes('painel')) {
+                    return problemDatabase['luz painel'];
+                }
+                if (lowerText.includes('gasta') || lowerText.includes('consome')) {
+                    return problemDatabase['consumo'];
+                }
+                if (lowerText.includes('esquenta') || lowerText.includes('temperatura')) {
+                    return problemDatabase['superaquecimento'];
+                }
+                
+                return null;
+            };
+
+            const addBotMessage = (content, delay = 1000) => {
+                setIsTyping(true);
+                setTimeout(() => {
+                    setMessages(prev => [...prev, {
+                        type: 'bot',
+                        content,
+                        timestamp: new Date()
+                    }]);
+                    setIsTyping(false);
+                }, delay);
+            };
+
+            const handleSend = () => {
+                if (!input.trim()) return;
+
+                const userMessage = {
+                    type: 'user',
+                    content: input,
+                    timestamp: new Date()
+                };
+
+                setMessages(prev => [...prev, userMessage]);
+                const userInput = input;
+                setInput('');
+
+                setTimeout(() => {
+                    processMessage(userInput);
+                }, 500);
+            };
+
+            const processMessage = (text) => {
+                if (currentStep === 'initial') {
+                    const problem = detectProblem(text);
+                    
+                    if (problem) {
+                        setDiagnosticData(problem);
+                        setCurrentStep('diagnosed');
+                        
+                        const response = `🔍 **Diagnóstico Preliminar**\n\n**Problema Identificado:** ${problem.problema}\n\n**Possíveis Causas:**\n${problem.causas.map((c, i) => `${i + 1}. ${c}`).join('\n')}\n\n**Gravidade:** ${problem.gravidade}\n**${problem.urgencia}**\n\n💰 **Estimativa de Custos:** R$ ${problem.custoMin} - R$ ${problem.custoMax}\n\n⚠️ *Lembre-se: Esta é uma estimativa baseada em casos similares. O valor final pode variar.*\n\nGostaria que eu recomende **oficinas confiáveis** próximas a você?`;
+                        
+                        addBotMessage(response, 1500);
+                    } else {
+                        addBotMessage('Hmm, não consegui identificar o problema específico. Você poderia descrever melhor? Por exemplo:\n\n• O carro faz algum barulho?\n• Há alguma luz acesa no painel?\n• O problema é ao ligar, dirigir ou frear?\n• Você nota fumaça ou cheiro diferente?', 1000);
+                    }
+                } else if (currentStep === 'diagnosed') {
+                    if (text.toLowerCase().includes('sim') || text.toLowerCase().includes('oficina')) {
+                        setCurrentStep('showWorkshops');
+                        
+                        let workshopList = '🔧 **Oficinas Recomendadas na Sua Região**\n\n';
+                        oficinas.forEach((of, i) => {
+                            workshopList += `**${i + 1}. ${of.nome}**\n`;
+                            workshopList += `📍 ${of.distancia} de distância\n`;
+                            workshopList += `⭐ ${of.avaliacao}/5.0 (baseado em avaliações)\n`;
+                            workshopList += `🔧 Especialidade: ${of.especialidade}\n`;
+                            workshopList += `💵 Faixa de preço: ${of.preco}\n\n`;
+                        });
+                        
+                        workshopList += '✅ **Por que confiamos nessas oficinas?**\n• Avaliações verificadas de clientes reais\n• Preços compatíveis com a média do mercado\n• Sem histórico de reclamações graves\n\n📱 Deseja que eu te ajude com mais alguma coisa?';
+                        
+                        addBotMessage(workshopList, 2000);
+                    } else {
+                        addBotMessage('Entendido! Se precisar de qualquer ajuda ou quiser fazer outro diagnóstico, é só me chamar! 😊\n\nLembre-se: **73% dos motoristas já se sentiram enganados em oficinas**. Com o Mão na Roda, você tem informação e transparência! 💪', 1000);
+                        setCurrentStep('initial');
+                    }
+                } else {
+                    addBotMessage('Posso te ajudar com outro problema do seu veículo? É só descrever o que está acontecendo! 🚗', 800);
+                    setCurrentStep('initial');
+                    setDiagnosticData({});
+                }
+            };
+
+            return (
+                <div className="flex flex-col h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+                    <div className="bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg">
+                        <div className="max-w-4xl mx-auto px-6 py-4">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-white p-2 rounded-lg">
+                                    <Wrench size={28} />
+                                </div>
+                                <div>
+                                    <h1 className="text-2xl font-bold text-white">Mão na Roda</h1>
+                                    <p className="text-blue-100 text-sm">Seu assistente inteligente para manutenção automotiva</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-blue-800 border-t border-blue-700">
+                        <div className="max-w-4xl mx-auto px-6 py-3">
+                            <div className="flex flex-wrap gap-6 text-sm">
+                                <div className="flex items-center gap-2 text-blue-100">
+                                    <CheckCircle size={16} />
+                                    <span>R$ 67bi em manutenção/ano</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-blue-100">
+                                    <AlertCircle size={16} />
+                                    <span>73% já se sentiram enganados</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-blue-100">
+                                    <DollarSign size={16} />
+                                    <span>Economize até 30% com diagnóstico correto</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto">
+                        <div className="max-w-4xl mx-auto px-6 py-6 space-y-4">
+                            {messages.map((msg, idx) => (
+                                <div key={idx} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                                        msg.type === 'user' 
+                                            ? 'bg-blue-600 text-white' 
+                                            : 'bg-white text-gray-800 shadow-md'
+                                    }`}>
+                                        {msg.type === 'bot' && (
+                                            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-200">
+                                                <Car size={18} />
+                                                <span className="font-semibold text-sm text-blue-600">Assistente Mão na Roda</span>
+                                            </div>
+                                        )}
+                                        <div className="text-sm">
+                                            {msg.content.split('\n').map((line, i) => {
+                                                if (line.startsWith('**') && line.endsWith('**')) {
+                                                    return <div key={i} className="font-bold my-2">{line.replace(/\*\*/g, '')}</div>;
+                                                }
+                                                if (line.startsWith('###')) {
+                                                    return <h3 key={i} className="font-bold text-lg mt-3 mb-1">{line.replace('###', '')}</h3>;
+                                                }
+                                                if (line.startsWith('•') || line.match(/^\d+\./)) {
+                                                    return <div key={i} className="ml-4 my-1">{line}</div>;
+                                                }
+                                                if (line.trim() === '') {
+                                                    return <div key={i} className="h-2"></div>;
+                                                }
+                                                return <div key={i}>{line}</div>;
+                                            })}
+                                        </div>
+                                        <div className="text-xs opacity-70 mt-2">
+                                            {msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                            
+                            {isTyping && (
+                                <div className="flex justify-start">
+                                    <div className="bg-white rounded-2xl px-4 py-3 shadow-md">
+                                        <div className="flex items-center gap-2">
+                                            <Car size={18} />
+                                            <div className="flex gap-1">
+                                                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                                                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                                                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
+                    </div>
+
+                    <div className="bg-white border-t border-gray-200 shadow-lg">
+                        <div className="max-w-4xl mx-auto px-6 py-4">
+                            <div className="flex gap-3">
+                                <input
+                                    type="text"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                                    placeholder="Descreva o problema do seu veículo..."
+                                    className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                                <button
+                                    onClick={handleSend}
+                                    disabled={!input.trim() || isTyping}
+                                    className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2 font-medium"
+                                >
+                                    <Send />
+                                    Enviar
+                                </button>
+                            </div>
+                            <div className="mt-3 text-xs text-gray-500 text-center">
+                                💡 Dica: Seja específico! Ex: "barulho no motor", "freio fazendo barulho", "carro não liga"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<MaoNaRoda />, document.getElementById('root'));
+    </script>
+</body>
+</html>
