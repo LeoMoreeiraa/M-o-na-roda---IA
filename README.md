@@ -2,8 +2,6 @@
 
 > **Status:** MVP / Protótipo Funcional
 
-![Banner Mão na Roda](https://via.placeholder.com/1000x300?text=Mão+na+Roda+Banner)
-*(Substitua o link acima por uma imagem real do seu projeto ou um print da tela inicial)*
 
 ## 📄 Sobre o Projeto
 
