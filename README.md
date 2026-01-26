@@ -20,13 +20,22 @@ Um assistente virtual que atua em três frentes principais:
 
 ---
 
+## 🚀 Aceleração e Reconhecimento
+
+Este projeto foi selecionado para participar do **Santander X Explorer**, um programa global de empreendedorismo e pré-incubação.
+
+> **Sobre o Santander X Explorer:**
+> É uma iniciativa internacional do Banco Santander que seleciona projetos universitários de alto potencial em mais de 10 países. Durante 12 semanas, o programa oferece mentoria especializada, treinamento em validação de negócios e acesso a uma rede global de inovação para transformar ideias em soluções viáveis de mercado (MVPs).
+
+---
+
 ## 🚀 Funcionalidades Principais
 
 * [cite_start]**🤖 Diagnóstico Preliminar via IA:** O usuário relata o problema (ex: "freio fazendo barulho") e a IA, treinada com mais de 10.000 falhas, sugere as causas prováveis[cite: 206].
-* [cite_start]**💰 Estimativa de Preços:** Consulta base de dados com preços de 500+ serviços para fornecer uma faixa de valor justa (Min - Max)[cite: 210].
-* [cite_start]**📍 Recomendação Geolocalizada:** Filtra oficinas parceiras próximas com avaliação mínima de 4.5/5[cite: 208].
-* [cite_start]**🔔 Alertas de Manutenção:** Notificações sobre cuidados preventivos (troca de óleo, filtros, etc.)[cite: 212].
-* [cite_start]**📝 Histórico Digital:** Armazena o registro completo de serviços realizados, valorizando o veículo na revenda[cite: 214].
+**💰 Estimativa de Preços:** Consulta base de dados com preços de 500+ serviços para fornecer uma faixa de valor justa (Min - Max)
+**📍 Recomendação Geolocalizada:** Filtra oficinas parceiras próximas com avaliação mínima de 4.5/5
+**🔔 Alertas de Manutenção:** Notificações sobre cuidados preventivos (troca de óleo, filtros, etc.)
+**📝 Histórico Digital:** Armazena o registro completo de serviços realizados, valorizando o veículo na revenda
 
 ---
 
@@ -73,4 +82,4 @@ Um assistente virtual que atua em três frentes principais:
 Este projeto é desenvolvido para fins acadêmicos.
 
 ---
-*Desenvolvido pela Turma 6N - Ciência da Computação.*
+*Desenvolvido por um grupo da Turma 6N - Ciência da Computação.*
