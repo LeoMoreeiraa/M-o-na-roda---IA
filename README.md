@@ -61,7 +61,7 @@ Este projeto foi selecionado para participar do **Santander X Explorer**, um pro
 
 ## 🔗 Links Úteis
 
-* **Acesse o Protótipo Web:** [https://leomoreeiraa.github.io/M-o-na-roda-IA/](https://leomoreeiraa.github.io/M-o-na-roda-IA/)
+* **Acesse o Protótipo Web:** [https://leomoreeiraa.github.io/M-o-na-roda-IA/](https://leomoreeiraa.github.io/M-o-na-roda---IA/ )
 * 
 
 ---
