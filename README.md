@@ -31,7 +31,7 @@ Este projeto foi selecionado para participar do **Santander X Explorer**, um pro
 
 ## 🚀 Funcionalidades Principais
 
-* [cite_start]**🤖 Diagnóstico Preliminar via IA:** O usuário relata o problema (ex: "freio fazendo barulho") e a IA, treinada com mais de 10.000 falhas, sugere as causas prováveis[cite: 206].
+**🤖 Diagnóstico Preliminar via IA:** O usuário relata o problema (ex: "freio fazendo barulho") e a IA, treinada com mais de 10.000 falhas, sugere as causas prováveis
 **💰 Estimativa de Preços:** Consulta base de dados com preços de 500+ serviços para fornecer uma faixa de valor justa (Min - Max)
 **📍 Recomendação Geolocalizada:** Filtra oficinas parceiras próximas com avaliação mínima de 4.5/5
 **🔔 Alertas de Manutenção:** Notificações sobre cuidados preventivos (troca de óleo, filtros, etc.)
